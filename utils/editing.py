@@ -5,6 +5,7 @@ from utils.editing_tool import Editing_Tool
 import psycopg2
 import json
 import datetime
+import ast
 
 ftp_directory = json.load(open("ftp_directory.json"))
 FTP_MERGE_TIFF_PATH = ftp_directory['merge_tiffs_result_directory']
@@ -48,6 +49,7 @@ class Editing:
 
     def merge_tiffs(self, conn, id, task_param, config_data):
         input_files = task_param['input_files']
+        input_files = ast.literal_eval(input_files)
         try:
             ftp = connect_ftp(config_data)
             input_files_local = []
