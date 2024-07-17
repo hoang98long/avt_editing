@@ -4,7 +4,7 @@ from utils.config import *
 from utils.editing_tool import Editing_Tool
 import psycopg2
 import json
-import datetime
+from datetime import datetime
 import ast
 
 ftp_directory = json.load(open("ftp_directory.json"))
@@ -44,6 +44,12 @@ def route_to_db(cursor):
     cursor.execute("SELECT current_schema()")
 
 
+def get_time():
+    now = datetime.now()
+    current_datetime = datetime(now.year, now.month, now.day, now.hour, now.minute, now.second, now.microsecond)
+    return current_datetime
+
+
 class Editing:
     def __init__(self):
         pass
@@ -59,7 +65,7 @@ class Editing:
                 local_file_path = os.path.join(LOCAL_SRC_MERGE_TIFF_PATH, filename)
                 input_files_local.append(local_file_path)
                 download_file(ftp, input_file, local_file_path)
-            date_create = str(datetime.datetime.now().date()).replace('-', '_')
+            date_create = str(datetime.now().date()).replace('-', '_')
             output_image_name = "result_merge" + "_" + format(date_create) + ".tiff"
             output_path = os.path.join(LOCAL_RESULT_MERGE_TIFF_PATH, output_image_name)
             editing_tool = Editing_Tool()
@@ -75,7 +81,7 @@ class Editing:
             print("Connection closed")
             cursor = conn.cursor()
             route_to_db(cursor)
-            cursor.execute("UPDATE avt_task SET task_stat = 1, task_output = %s WHERE id = %s", (task_output, id,))
+            cursor.execute("UPDATE avt_task SET task_stat = 1, task_output = %s, updated_at = %s WHERE id = %s", (task_output, get_time(), id,))
             conn.commit()
         except ftplib.all_errors as e:
             cursor = conn.cursor()
@@ -95,7 +101,7 @@ class Editing:
             filename = input_file.split("/")[-1]
             local_file_path = os.path.join(LOCAL_SRC_CROP_TIFF_PATH, filename)
             download_file(ftp, input_file, local_file_path)
-            date_create = str(datetime.datetime.now().date()).replace('-', '_')
+            date_create = str(datetime.now().date()).replace('-', '_')
             output_image_name = "result_crop" + "_" + format(date_create) + ".tiff"
             output_path = os.path.join(LOCAL_RESULT_CROP_TIFF_PATH, output_image_name)
             editing_tool = Editing_Tool()
@@ -111,7 +117,7 @@ class Editing:
             print("Connection closed")
             cursor = conn.cursor()
             route_to_db(cursor)
-            cursor.execute("UPDATE avt_task SET task_stat = 1, task_output = %s WHERE id = %s", (task_output, id,))
+            cursor.execute("UPDATE avt_task SET task_stat = 1, task_output = %s, updated_at = %s WHERE id = %s", (task_output, get_time(), id,))
             conn.commit()
         except ftplib.all_errors as e:
             cursor = conn.cursor()
