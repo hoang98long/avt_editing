@@ -19,3 +19,38 @@ class Editing_Tool:
 
         with rasterio.open(output_path, "w", **out_meta) as dest:
             dest.write(mosaic)
+
+    def crop_tiff_image(self, input_tiff_path, output_tiff_path, xmin, ymin, xmax, ymax):
+        with rasterio.open(input_tiff_path) as src:
+            # Get the transform and inverse transform from the image
+            transform = src.transform
+            inv_transform = ~transform
+
+            # Convert geographical coordinates to pixel indices
+            top_left = inv_transform * (xmin, ymax)  # ymax for top
+            bottom_right = inv_transform * (xmax, ymin)  # ymin for bottom
+
+            # Convert to integer pixel indices
+            x1, y1 = map(int, map(round, top_left))
+            x2, y2 = map(int, map(round, bottom_right))
+
+            # Ensure that y1 is less than y2 for correct window slicing
+            if y1 > y2:
+                y1, y2 = y2, y1
+
+            # Read the image data within the window
+            window = rasterio.windows.Window.from_slices((y1, y2), (x1, x2))
+            image = src.read(window=window)
+            profile = src.profile
+
+            # Update the profile with new width, height, and transform
+            new_transform = rasterio.windows.transform(window, transform)
+            profile.update({
+                'height': y2 - y1,
+                'width': x2 - x1,
+                'transform': new_transform
+            })
+
+            # Write the cropped image to a new TIFF file
+            with rasterio.open(output_tiff_path, 'w', **profile) as dst:
+                dst.write(image)

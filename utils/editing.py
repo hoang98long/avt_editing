@@ -59,7 +59,7 @@ class Editing:
                 input_files_local.append(local_file_path)
                 download_file(ftp, input_file, local_file_path)
             date_create = str(datetime.datetime.now().date()).replace('-', '_')
-            output_image_name = "result" + "_" + format(date_create) + ".tiff"
+            output_image_name = "result_merge" + "_" + format(date_create) + ".tiff"
             output_path = os.path.join(LOCAL_RESULT_MERGE_TIFF_PATH, output_image_name)
             editing_tool = Editing_Tool()
             editing_tool.merge_tiffs(input_files_local, output_path)
@@ -83,6 +83,43 @@ class Editing:
             conn.commit()
             print(f"FTP error: {e}")
 
+    def crop_tiff_image(self, conn, id, task_param, config_data):
+        input_file = task_param['input_file']
+        xmin = float(task_param['xmin'])
+        xmax = float(task_param['xmax'])
+        ymin = float(task_param['ymin'])
+        ymax = float(task_param['ymax'])
+        try:
+            ftp = connect_ftp(config_data)
+            filename = input_file.split("/")[-1]
+            local_file_path = os.path.join(LOCAL_SRC_MERGE_TIFF_PATH, filename)
+            download_file(ftp, input_file, local_file_path)
+            date_create = str(datetime.datetime.now().date()).replace('-', '_')
+            output_image_name = "result_crop" + "_" + format(date_create) + ".tiff"
+            output_path = os.path.join(LOCAL_RESULT_MERGE_TIFF_PATH, output_image_name)
+            editing_tool = Editing_Tool()
+            editing_tool.crop_tiff_image(local_file_path, output_path, xmin, ymin, xmax, ymax)
+            ftp_dir = FTP_MERGE_TIFF_PATH
+            ftp.cwd(str(ftp_dir))
+            save_dir = ftp_dir + "/" + output_image_name
+            task_output = str({
+                "output_image": save_dir
+            })
+            with open(output_path, "rb") as file:
+                ftp.storbinary(f"STOR {save_dir}", file)
+            print("Connection closed")
+            cursor = conn.cursor()
+            route_to_db(cursor)
+            cursor.execute("UPDATE avt_task SET task_stat = 1, task_output = %s WHERE id = %s", (task_output, id,))
+            conn.commit()
+        except ftplib.all_errors as e:
+            cursor = conn.cursor()
+            route_to_db(cursor)
+            cursor.execute("UPDATE avt_task SET task_stat = 0 WHERE id = %s", (id,))
+            conn.commit()
+            print(f"FTP error: {e}")
+
+
     def process(self, id, config_data):
         conn = psycopg2.connect(
             dbname=config_data['database']['database'],
@@ -97,5 +134,9 @@ class Editing:
         cursor.execute("SELECT task_param FROM avt_task WHERE id = %s", (id,))
         result = cursor.fetchone()
         task_param = json.loads(result[0])
-        self.merge_tiffs(conn, id, task_param, config_data)
+        algorithm = task_param["algorithm"]
+        if algorithm == "ghep_anh":
+            self.merge_tiffs(conn, id, task_param, config_data)
+        elif algorithm == "cat_anh":
+            self.crop_tiff_image(conn, id, task_param, config_data)
         cursor.close()
