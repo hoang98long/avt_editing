@@ -50,6 +50,13 @@ def get_time():
     return current_datetime
 
 
+def get_time_string():
+    now = datetime.now()
+    current_datetime = (str(now.year) + "_" + str(now.month) + "_" + str(now.day) + "_"
+                        + str(now.hour) + "_" + str(now.minute) + "_" + str(now.second))
+    return current_datetime
+
+
 class Editing:
     def __init__(self):
         pass
@@ -65,7 +72,7 @@ class Editing:
                 local_file_path = os.path.join(LOCAL_SRC_MERGE_TIFF_PATH, filename)
                 input_files_local.append(local_file_path)
                 download_file(ftp, input_file, local_file_path)
-            date_create = str(datetime.now().date()).replace('-', '_')
+            date_create = get_time_string()
             output_image_name = "result_merge" + "_" + format(date_create) + ".tiff"
             output_path = os.path.join(LOCAL_RESULT_MERGE_TIFF_PATH, output_image_name)
             editing_tool = Editing_Tool()
@@ -78,10 +85,12 @@ class Editing:
             })
             with open(output_path, "rb") as file:
                 ftp.storbinary(f"STOR {save_dir}", file)
+            ftp.sendcmd(f'SITE CHMOD 775 {save_dir}')
             print("Connection closed")
             cursor = conn.cursor()
             route_to_db(cursor)
-            cursor.execute("UPDATE avt_task SET task_stat = 1, task_output = %s, updated_at = %s WHERE id = %s", (task_output, get_time(), id,))
+            cursor.execute("UPDATE avt_task SET task_stat = 1, task_output = %s, updated_at = %s WHERE id = %s",
+                           (task_output, get_time(), id,))
             conn.commit()
         except ftplib.all_errors as e:
             cursor = conn.cursor()
@@ -101,7 +110,7 @@ class Editing:
             filename = input_file.split("/")[-1]
             local_file_path = os.path.join(LOCAL_SRC_CROP_TIFF_PATH, filename)
             download_file(ftp, input_file, local_file_path)
-            date_create = str(datetime.now().date()).replace('-', '_')
+            date_create = get_time_string()
             output_image_name = "result_crop" + "_" + format(date_create) + ".tiff"
             output_path = os.path.join(LOCAL_RESULT_CROP_TIFF_PATH, output_image_name)
             editing_tool = Editing_Tool()
@@ -114,10 +123,12 @@ class Editing:
             })
             with open(output_path, "rb") as file:
                 ftp.storbinary(f"STOR {save_dir}", file)
+            ftp.sendcmd(f'SITE CHMOD 775 {save_dir}')
             print("Connection closed")
             cursor = conn.cursor()
             route_to_db(cursor)
-            cursor.execute("UPDATE avt_task SET task_stat = 1, task_output = %s, updated_at = %s WHERE id = %s", (task_output, get_time(), id,))
+            cursor.execute("UPDATE avt_task SET task_stat = 1, task_output = %s, updated_at = %s WHERE id = %s",
+                           (task_output, get_time(), id,))
             conn.commit()
         except ftplib.all_errors as e:
             cursor = conn.cursor()
@@ -125,7 +136,6 @@ class Editing:
             cursor.execute("UPDATE avt_task SET task_stat = 0 WHERE id = %s", (id,))
             conn.commit()
             print(f"FTP error: {e}")
-
 
     def process(self, id, config_data):
         conn = psycopg2.connect(
