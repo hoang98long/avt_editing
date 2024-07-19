@@ -71,9 +71,10 @@ class Editing:
                 filename = input_file.split("/")[-1]
                 local_file_path = os.path.join(LOCAL_SRC_MERGE_TIFF_PATH, filename)
                 input_files_local.append(local_file_path)
-                download_file(ftp, input_file, local_file_path)
+                if not os.path.isfile(local_file_path):
+                    download_file(ftp, input_file, local_file_path)
             date_create = get_time_string()
-            output_image_name = "result_merge" + "_" + format(date_create) + ".tiff"
+            output_image_name = "result_merge_" + format(date_create) + ".tiff"
             output_path = os.path.join(LOCAL_RESULT_MERGE_TIFF_PATH, output_image_name)
             editing_tool = Editing_Tool()
             editing_tool.merge_tiffs(input_files_local, output_path)
@@ -109,9 +110,10 @@ class Editing:
             ftp = connect_ftp(config_data)
             filename = input_file.split("/")[-1]
             local_file_path = os.path.join(LOCAL_SRC_CROP_TIFF_PATH, filename)
-            download_file(ftp, input_file, local_file_path)
+            if not os.path.isfile(local_file_path):
+                download_file(ftp, input_file, local_file_path)
             date_create = get_time_string()
-            output_image_name = "result_crop" + "_" + format(date_create) + ".tiff"
+            output_image_name = "result_crop_" + format(date_create) + ".tiff"
             output_path = os.path.join(LOCAL_RESULT_CROP_TIFF_PATH, output_image_name)
             editing_tool = Editing_Tool()
             editing_tool.crop_tiff_image(local_file_path, output_path, xmin, ymin, xmax, ymax)
