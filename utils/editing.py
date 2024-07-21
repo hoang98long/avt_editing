@@ -83,7 +83,7 @@ class Editing:
             save_dir = ftp_dir + "/" + output_image_name
             task_output = str({
                 "output_image": [save_dir]
-            })
+            }).replace("'", "\"")
             with open(output_path, "rb") as file:
                 ftp.storbinary(f"STOR {save_dir}", file)
             ftp.sendcmd(f'SITE CHMOD 775 {save_dir}')
@@ -122,7 +122,7 @@ class Editing:
             save_dir = ftp_dir + "/" + output_image_name
             task_output = str({
                 "output_image": [save_dir]
-            })
+            }).replace("'", "\"")
             with open(output_path, "rb") as file:
                 ftp.storbinary(f"STOR {save_dir}", file)
             ftp.sendcmd(f'SITE CHMOD 775 {save_dir}')
