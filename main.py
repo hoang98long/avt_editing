@@ -31,7 +31,8 @@ if __name__ == "__main__":
         config_data = json.load(open(args.config_file))
         task_type = 9
         list_task = get_task_id_list(task_type)
-        for task_id in list_task:
-            editing = Editing()
-            editing.process(task_id, config_data)
+        if len(list_task) > 0:
+            for task_id in list_task:
+                editing = Editing()
+                editing.process(task_id, config_data)
             

@@ -102,10 +102,11 @@ class Editing:
 
     def crop_tiff_image(self, conn, id, task_param, config_data):
         input_file = task_param['input_file']
-        xmin = float(task_param['xmin'])
-        xmax = float(task_param['xmax'])
-        ymin = float(task_param['ymin'])
-        ymax = float(task_param['ymax'])
+        xmin, ymin, xmax, ymax = task_param['bbox'][0:4]
+        xmin = float(xmin)
+        ymin = float(ymin)
+        xmax = float(xmax)
+        ymax = float(ymax)
         try:
             ftp = connect_ftp(config_data)
             filename = input_file.split("/")[-1]
