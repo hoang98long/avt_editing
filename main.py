@@ -1,4 +1,6 @@
 import argparse
+import time
+
 from utils.editing import Editing
 import json
 import psycopg2
@@ -35,4 +37,4 @@ if __name__ == "__main__":
             for task_id in list_task:
                 editing = Editing()
                 editing.process(task_id, config_data)
-            
+        time.sleep(5)

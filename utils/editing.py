@@ -6,6 +6,8 @@ import psycopg2
 import json
 from datetime import datetime
 import ast
+import time
+import threading
 
 ftp_directory = json.load(open("ftp_directory.json"))
 FTP_MERGE_TIFF_PATH = ftp_directory['merge_tiffs_result_directory']
@@ -42,6 +44,28 @@ def download_file(ftp, ftp_file_path, local_file_path):
 def route_to_db(cursor):
     cursor.execute('SET search_path TO public')
     cursor.execute("SELECT current_schema()")
+
+
+def update_database(id, task_stat_value, conn):
+    cursor = conn.cursor()
+    # Update the task_stat field
+    cursor.execute('UPDATE avt_task SET task_stat = %s WHERE id = %s', (task_stat_value, id))
+    conn.commit()
+    # Select and print the updated row
+    # cursor.execute('SELECT * FROM avt_task WHERE id = %s', (id,))
+    # row = cursor.fetchone()
+    # print(row)
+
+
+def check_and_update(id, task_stat_value_holder, conn, stop_event):
+    start_time = time.time()
+    while not stop_event.is_set():
+        time.sleep(5)
+        if stop_event.is_set():
+            break
+        elapsed_time = time.time() - start_time
+        task_stat_value_holder['value'] = max(2, int(elapsed_time))
+        update_database(id, task_stat_value_holder['value'], conn)
 
 
 def get_time():
@@ -93,12 +117,14 @@ class Editing:
             cursor.execute("UPDATE avt_task SET task_stat = 1, task_output = %s, updated_at = %s WHERE id = %s",
                            (task_output, get_time(), id,))
             conn.commit()
+            return True
         except ftplib.all_errors as e:
             cursor = conn.cursor()
             route_to_db(cursor)
             cursor.execute("UPDATE avt_task SET task_stat = 0 WHERE id = %s", (id,))
             conn.commit()
             print(f"FTP error: {e}")
+            return False
 
     def crop_tiff_image(self, conn, id, task_param, config_data):
         input_file = task_param['input_file']
@@ -133,12 +159,14 @@ class Editing:
             cursor.execute("UPDATE avt_task SET task_stat = 1, task_output = %s, updated_at = %s WHERE id = %s",
                            (task_output, get_time(), id,))
             conn.commit()
+            return True
         except ftplib.all_errors as e:
             cursor = conn.cursor()
             route_to_db(cursor)
             cursor.execute("UPDATE avt_task SET task_stat = 0 WHERE id = %s", (id,))
             conn.commit()
             print(f"FTP error: {e}")
+            return False
 
     def process(self, id, config_data):
         conn = psycopg2.connect(
@@ -148,15 +176,30 @@ class Editing:
             host=config_data['database']['host'],
             port=config_data['database']['port']
         )
-        cursor = conn.cursor()
-        cursor.execute('SET search_path TO public')
-        cursor.execute("SELECT current_schema()")
-        cursor.execute("SELECT task_param FROM avt_task WHERE id = %s", (id,))
-        result = cursor.fetchone()
-        task_param = json.loads(result[0])
-        algorithm = task_param["algorithm"]
-        if algorithm == "ghep_anh":
-            self.merge_tiffs(conn, id, task_param, config_data)
-        elif algorithm == "cat_anh":
-            self.crop_tiff_image(conn, id, task_param, config_data)
-        cursor.close()
+        task_stat_value_holder = {'value': 2}
+        stop_event = threading.Event()
+        checker_thread = threading.Thread(target=check_and_update, args=(id, task_stat_value_holder, conn, stop_event))
+        checker_thread.start()
+        try:
+            cursor = conn.cursor()
+            cursor.execute('SET search_path TO public')
+            cursor.execute("SELECT current_schema()")
+            cursor.execute("SELECT task_param FROM avt_task WHERE id = %s", (id,))
+            result = cursor.fetchone()
+            task_param = json.loads(result[0])
+            algorithm = task_param["algorithm"]
+            return_flag = False
+            if algorithm == "ghep_anh":
+                return_flag = self.merge_tiffs(conn, id, task_param, config_data)
+            elif algorithm == "cat_anh":
+                return_flag = self.crop_tiff_image(conn, id, task_param, config_data)
+            cursor.close()
+            if return_flag:
+                task_stat_value_holder['value'] = 1
+            else:
+                task_stat_value_holder['value'] = 0
+        except Exception as e:
+            task_stat_value_holder['value'] = 0
+        stop_event.set()
+        update_database(id, task_stat_value_holder['value'], conn)
+        checker_thread.join()
