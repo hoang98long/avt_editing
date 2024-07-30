@@ -1,5 +1,8 @@
 import rasterio
 from rasterio.merge import merge
+from rasterio.mask import mask
+from shapely.geometry import Polygon
+# from shapely.geometry.polygon import orient
 
 
 class Editing_Tool:
@@ -54,3 +57,16 @@ class Editing_Tool:
             # Write the cropped image to a new TIFF file
             with rasterio.open(output_tiff_path, 'w', **profile) as dst:
                 dst.write(image)
+
+    def crop_polygon_tiff(self, tiff_path, output_path, polygon_coords):
+        with rasterio.open(tiff_path) as src:
+            polygon = Polygon(polygon_coords)
+            # oriented_polygon = orient(polygon, sign=1.0)
+            out_image, out_transform = mask(src, [polygon], crop=True)
+            out_meta = src.meta.copy()
+            out_meta.update({"driver": "GTiff",
+                             "height": out_image.shape[1],
+                             "width": out_image.shape[2],
+                             "transform": out_transform})
+            with rasterio.open(output_path, "w", **out_meta) as dest:
+                dest.write(out_image)
