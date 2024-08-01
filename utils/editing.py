@@ -9,6 +9,10 @@ import ast
 import time
 import threading
 import numpy as np
+import rasterio
+from rasterio.warp import calculate_default_transform, reproject, Resampling
+
+
 
 ftp_directory = json.load(open("ftp_directory.json"))
 FTP_MERGE_TIFF_PATH = ftp_directory['merge_tiffs_result_directory']
@@ -83,6 +87,41 @@ def get_time_string():
     return current_datetime
 
 
+def check_epsg_code(tiff_path):
+    with rasterio.open(tiff_path) as src:
+        crs = src.crs
+        if crs:
+            epsg_code = int(crs.to_epsg())
+            return epsg_code
+        else:
+            return 0
+
+
+def convert_epsg_4326(input_tiff_path, output_tiff_path, dst_crs='EPSG:4326'):
+    with rasterio.open(input_tiff_path) as src:
+        src_profile = src.profile
+
+        transform, width, height = calculate_default_transform(
+            src.crs, dst_crs, src.width, src.height, *src.bounds)
+
+        dst_profile = src_profile.copy()
+        dst_profile.update({
+            'crs': dst_crs,
+            'transform': transform,
+            'width': width,
+            'height': height
+        })
+        with rasterio.open(output_tiff_path, 'w', **dst_profile) as dst:
+            for i in range(1, src.count + 1):
+                reproject(
+                    source=rasterio.band(src, i),
+                    destination=rasterio.band(dst, i),
+                    src_transform=src.transform,
+                    src_crs=src.crs,
+                    dst_transform=transform,
+                    dst_crs=dst_crs,
+                    resampling=Resampling.nearest)
+
 class Editing:
     def __init__(self):
         pass
@@ -99,6 +138,18 @@ class Editing:
                 input_files_local.append(local_file_path)
                 if not os.path.isfile(local_file_path):
                     download_file(ftp, input_file, local_file_path)
+            for i in range(len(input_files_local)):
+                epsg_code = check_epsg_code(input_files_local[i])
+                if epsg_code == 0:
+                    cursor = conn.cursor()
+                    route_to_db(cursor)
+                    cursor.execute("UPDATE avt_task SET task_stat = 0 AND task_message = 'EPSG ERROR' WHERE id = %s", (id,))
+                    conn.commit()
+                    return False
+                elif epsg_code != 4326:
+                    converted_input_file_local = input_files_local[i].split(".")[0] + "_4326.tiff"
+                    convert_epsg_4326(input_files_local[i], converted_input_file_local)
+                    input_files_local[i] = converted_input_file_local
             date_create = get_time_string()
             output_image_name = "result_merge_" + format(date_create) + ".tiff"
             output_path = os.path.join(LOCAL_RESULT_MERGE_TIFF_PATH, output_image_name)
@@ -141,6 +192,17 @@ class Editing:
             local_file_path = os.path.join(LOCAL_SRC_CROP_TIFF_PATH, filename)
             if not os.path.isfile(local_file_path):
                 download_file(ftp, input_file, local_file_path)
+            epsg_code = check_epsg_code(local_file_path)
+            if epsg_code == 0:
+                cursor = conn.cursor()
+                route_to_db(cursor)
+                cursor.execute("UPDATE avt_task SET task_stat = 0 AND task_message = 'EPSG ERROR' WHERE id = %s", (id,))
+                conn.commit()
+                return False
+            elif epsg_code != 4326:
+                converted_input_files_local = local_file_path.split(".")[0] + "_4326.tiff"
+                convert_epsg_4326(local_file_path, converted_input_files_local)
+                local_file_path = converted_input_files_local
             date_create = get_time_string()
             output_image_name = "result_crop_" + format(date_create) + ".tiff"
             output_path = os.path.join(LOCAL_RESULT_CROP_TIFF_PATH, output_image_name)
@@ -181,6 +243,17 @@ class Editing:
             local_file_path = os.path.join(LOCAL_SRC_CROP_POLYGON_TIFF_PATH, filename)
             if not os.path.isfile(local_file_path):
                 download_file(ftp, input_file, local_file_path)
+            epsg_code = check_epsg_code(local_file_path)
+            if epsg_code == 0:
+                cursor = conn.cursor()
+                route_to_db(cursor)
+                cursor.execute("UPDATE avt_task SET task_stat = 0 AND task_message = 'EPSG ERROR' WHERE id = %s", (id,))
+                conn.commit()
+                return False
+            elif epsg_code != 4326:
+                converted_input_files_local = local_file_path.split(".")[0] + "_4326.tiff"
+                convert_epsg_4326(local_file_path, converted_input_files_local)
+                local_file_path = converted_input_files_local
             date_create = get_time_string()
             output_image_name = "result_crop_polygon" + format(date_create) + ".tiff"
             output_path = os.path.join(LOCAL_RESULT_CROP_POLYGON_TIFF_PATH, output_image_name)
