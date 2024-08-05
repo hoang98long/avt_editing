@@ -5,5 +5,6 @@
     "equalize_image_result_directory": "/data/RASTER_PREPR/anh_tien_xu_ly/can_bang_anh",
     "merge_tiffs_result_directory": "/data/RASTER_ARCHIVED/anh_bien_tap/ghep_anh",
     "crop_tiff_result_directory": "/data/RASTER_ARCHIVED/anh_bien_tap/cat_anh",
-    "crop_tiff_polygon_result_directory": "/data/RASTER_ARCHIVED/anh_bien_tap/cat_da_giac"
+    "crop_tiff_polygon_result_directory": "/data/RASTER_ARCHIVED/anh_bien_tap/cat_da_giac",
+    "stack_tiffs_result_directory": "/data/RASTER_ARCHIVED/anh_bien_tap/xep_chong"
 }

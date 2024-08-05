@@ -12,12 +12,11 @@ import numpy as np
 import rasterio
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 
-
-
 ftp_directory = json.load(open("ftp_directory.json"))
 FTP_MERGE_TIFF_PATH = ftp_directory['merge_tiffs_result_directory']
 FTP_CROP_TIFF_PATH = ftp_directory['crop_tiff_result_directory']
 FTP_CROP_POLYGON_TIFF_PATH = ftp_directory['crop_tiff_polygon_result_directory']
+FTP_STACK_TIFF_PATH = ftp_directory['stack_tiffs_result_directory']
 
 
 def connect_ftp(config_data):
@@ -122,6 +121,7 @@ def convert_epsg_4326(input_tiff_path, output_tiff_path, dst_crs='EPSG:4326'):
                     dst_crs=dst_crs,
                     resampling=Resampling.nearest)
 
+
 class Editing:
     def __init__(self):
         pass
@@ -143,7 +143,8 @@ class Editing:
                 if epsg_code == 0:
                     cursor = conn.cursor()
                     route_to_db(cursor)
-                    cursor.execute("UPDATE avt_task SET task_stat = 0 AND task_message = 'EPSG ERROR' WHERE id = %s", (id,))
+                    cursor.execute("UPDATE avt_task SET task_stat = 0 AND task_message = 'EPSG ERROR' WHERE id = %s",
+                                   (id,))
                     conn.commit()
                     return False
                 elif epsg_code != 4326:
@@ -283,6 +284,60 @@ class Editing:
             print(f"FTP error: {e}")
             return False
 
+    def stack_tiffs(self, conn, id, task_param, config_data):
+        input_files = task_param['input_files']
+        input_files = ast.literal_eval(input_files)
+        try:
+            ftp = connect_ftp(config_data)
+            input_files_local = []
+            for input_file in input_files:
+                filename = input_file.split("/")[-1]
+                local_file_path = os.path.join(LOCAL_SRC_STACK_TIFF_PATH, filename)
+                input_files_local.append(local_file_path)
+                if not os.path.isfile(local_file_path):
+                    download_file(ftp, input_file, local_file_path)
+            for i in range(len(input_files_local)):
+                epsg_code = check_epsg_code(input_files_local[i])
+                if epsg_code == 0:
+                    cursor = conn.cursor()
+                    route_to_db(cursor)
+                    cursor.execute("UPDATE avt_task SET task_stat = 0 AND task_message = 'EPSG ERROR' WHERE id = %s",
+                                   (id,))
+                    conn.commit()
+                    return False
+                elif epsg_code != 4326:
+                    converted_input_file_local = input_files_local[i].split(".")[0] + "_4326.tiff"
+                    convert_epsg_4326(input_files_local[i], converted_input_file_local)
+                    input_files_local[i] = converted_input_file_local
+            date_create = get_time_string()
+            output_image_name = "result_stack_" + format(date_create) + ".tiff"
+            output_path = os.path.join(LOCAL_RESULT_STACK_TIFF_PATH, output_image_name)
+            editing_tool = Editing_Tool()
+            editing_tool.stack_tiff(input_files_local, output_path)
+            ftp_dir = FTP_STACK_TIFF_PATH
+            ftp.cwd(str(ftp_dir))
+            save_dir = ftp_dir + "/" + output_image_name
+            task_output = str({
+                "output_image": [save_dir]
+            }).replace("'", "\"")
+            with open(output_path, "rb") as file:
+                ftp.storbinary(f"STOR {save_dir}", file)
+            ftp.sendcmd(f'SITE CHMOD 775 {save_dir}')
+            print("Connection closed")
+            cursor = conn.cursor()
+            route_to_db(cursor)
+            cursor.execute("UPDATE avt_task SET task_stat = 1, task_output = %s, updated_at = %s WHERE id = %s",
+                           (task_output, get_time(), id,))
+            conn.commit()
+            return True
+        except ftplib.all_errors as e:
+            cursor = conn.cursor()
+            route_to_db(cursor)
+            cursor.execute("UPDATE avt_task SET task_stat = 0 WHERE id = %s", (id,))
+            conn.commit()
+            print(f"FTP error: {e}")
+            return False
+
     def process(self, id, config_data):
         conn = psycopg2.connect(
             dbname=config_data['database']['database'],
@@ -310,6 +365,8 @@ class Editing:
                 return_flag = self.crop_tiff_image(conn, id, task_param, config_data)
             elif algorithm == "cat_da_giac":
                 return_flag = self.crop_polygon_tiff(conn, id, task_param, config_data)
+            elif algorithm == "xep_chong":
+                return_flag = self.stack_tiffs(conn, id, task_param, config_data)
             cursor.close()
             if return_flag:
                 task_stat_value_holder['value'] = 1

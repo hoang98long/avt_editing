@@ -3,6 +3,21 @@ from rasterio.merge import merge
 from rasterio.mask import mask
 from shapely.geometry import Polygon
 # from shapely.geometry.polygon import orient
+import os
+from datetime import datetime
+
+
+def get_date_modified(file_path):
+    timestamp = os.path.getmtime(file_path)
+    date_modified = datetime.fromtimestamp(timestamp)
+    return date_modified
+
+
+def sort_tiffs_by_date(tiff_paths):
+    tiffs_with_dates = [(path, get_date_modified(path)) for path in tiff_paths]
+    tiffs_with_dates.sort(key=lambda x: x[1], reverse=True)
+    sorted_tiff_paths = [path for path, _ in tiffs_with_dates]
+    return sorted_tiff_paths
 
 
 class Editing_Tool:
@@ -70,3 +85,9 @@ class Editing_Tool:
                              "transform": out_transform})
             with rasterio.open(output_path, "w", **out_meta) as dest:
                 dest.write(out_image)
+
+    def stack_tiff(self, tiff_paths, output_path):
+        sorted_tiff_paths = sort_tiffs_by_date(tiff_paths)
+        self.merge_tiffs(sorted_tiff_paths, output_path)
+
+
