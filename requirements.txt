@@ -1,0 +1,5 @@
+numpy==2.0.1
+psycopg2_binary==2.9.9
+pyinstaller==6.8.0
+rasterio==1.3.10
+Shapely==2.0.5
