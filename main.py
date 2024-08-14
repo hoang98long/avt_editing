@@ -4,6 +4,7 @@ import time
 from utils.editing import Editing
 import json
 import psycopg2
+import rasterio
 
 
 def get_task_id_list(task_type):
