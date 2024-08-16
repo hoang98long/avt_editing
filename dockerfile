@@ -12,7 +12,7 @@ RUN conda init bash
 
 COPY requirements.txt .
 RUN conda run -n avt_editing pip install -r requirements.txt
-RUN conda install -n avt_editing -c conda-forge GDAL
+RUN conda install -n avt -c conda-forge gdal=3.2.1 sqlite=3.34.0
 RUN conda install -n avt_editing -c conda-forge rasterio
 
 CMD ["bash", "-c", "source activate avt_editing && cd /app/avt_editing && python main.py --config_file /app/config.json"]
