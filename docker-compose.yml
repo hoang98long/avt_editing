@@ -1,0 +1,8 @@
+version: '1'
+services:
+  avt_editing:
+    build: .
+    volumes:
+      - ../config.json:/app/config.json
+      - .:/app/avt_editing
+    command: bash -c "source activate avt_editing && cd /app/avt_editing && python main.py --config_file /app/config.json"

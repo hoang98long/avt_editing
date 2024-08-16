@@ -15,4 +15,4 @@ RUN conda run -n avt_editing pip install -r requirements.txt
 RUN conda install -n avt_editing -c conda-forge gdal
 RUN conda install -n avt_editing -c conda-forge rasterio
 
-CMD ["bash", "-c", "source activate avt_editing && cd /app/avt_editing && python main.py"]
+CMD ["bash", "-c", "source activate avt_editing && cd /app/avt_editing && python main.py --config_file /app/config.json"]
