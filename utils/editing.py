@@ -5,7 +5,6 @@ from utils.editing_tool import Editing_Tool
 import psycopg2
 import json
 from datetime import datetime
-import ast
 import time
 import threading
 import numpy as np
@@ -128,7 +127,6 @@ class Editing:
 
     def merge_tiffs(self, conn, id, task_param, config_data):
         input_files = task_param['input_files']
-        input_files = ast.literal_eval(input_files)
         try:
             ftp = connect_ftp(config_data)
             input_files_local = []
@@ -286,7 +284,6 @@ class Editing:
 
     def stack_tiffs(self, conn, id, task_param, config_data):
         input_files = task_param['input_files']
-        input_files = ast.literal_eval(input_files)
         try:
             ftp = connect_ftp(config_data)
             input_files_local = []
