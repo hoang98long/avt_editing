@@ -153,12 +153,13 @@ class Editing:
             output_image_name = "result_merge_" + format(date_create) + ".tiff"
             output_path = os.path.join(LOCAL_RESULT_MERGE_TIFF_PATH, output_image_name)
             editing_tool = Editing_Tool()
-            editing_tool.merge_tiffs(input_files_local, output_path)
+            intersections = editing_tool.merge_tiffs(input_files_local, output_path)
             ftp_dir = FTP_MERGE_TIFF_PATH
             ftp.cwd(str(ftp_dir))
             save_dir = ftp_dir + "/" + output_image_name
             task_output = str({
-                "output_image": [save_dir]
+                "output_image": [save_dir],
+                "intersection": intersections
             }).replace("'", "\"")
             with open(output_path, "rb") as file:
                 ftp.storbinary(f"STOR {save_dir}", file)
@@ -310,12 +311,13 @@ class Editing:
             output_image_name = "result_stack_" + format(date_create) + ".tiff"
             output_path = os.path.join(LOCAL_RESULT_STACK_TIFF_PATH, output_image_name)
             editing_tool = Editing_Tool()
-            editing_tool.stack_tiff(input_files_local, output_path)
+            images_with_date = editing_tool.stack_tiff(input_files_local, output_path)
             ftp_dir = FTP_STACK_TIFF_PATH
             ftp.cwd(str(ftp_dir))
             save_dir = ftp_dir + "/" + output_image_name
             task_output = str({
-                "output_image": [save_dir]
+                "output_image": [save_dir],
+                "time_sorted_images": images_with_date
             }).replace("'", "\"")
             with open(output_path, "rb") as file:
                 ftp.storbinary(f"STOR {save_dir}", file)

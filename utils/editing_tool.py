@@ -1,10 +1,12 @@
 import rasterio
 from rasterio.merge import merge
 from rasterio.mask import mask
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, box
 # from shapely.geometry.polygon import orient
 import os
 from datetime import datetime
+from itertools import combinations
+
 
 
 def get_date_modified(file_path):
@@ -16,8 +18,40 @@ def get_date_modified(file_path):
 def sort_tiffs_by_date(tiff_paths):
     tiffs_with_dates = [(path, get_date_modified(path)) for path in tiff_paths]
     tiffs_with_dates.sort(key=lambda x: x[1], reverse=True)
-    sorted_tiff_paths = [path for path, _ in tiffs_with_dates]
-    return sorted_tiff_paths
+    # sorted_tiff_paths = [path for path, _ in tiffs_with_dates]
+    return tiffs_with_dates
+
+
+def intersect_detect_two_images(image1_path, image2_path):
+    with rasterio.open(image1_path) as src1, rasterio.open(image2_path) as src2:
+        bounds1 = src1.bounds
+        bounds2 = src2.bounds
+
+        geom1 = box(bounds1.left, bounds1.bottom, bounds1.right, bounds1.top)
+        geom2 = box(bounds2.left, bounds2.bottom, bounds2.right, bounds2.top)
+
+        intersection = geom1.intersection(geom2)
+
+        if not intersection.is_empty:
+            intersection_bounds = intersection.bounds
+            intersection_width = intersection_bounds[2] - intersection_bounds[0]
+            intersection_height = intersection_bounds[3] - intersection_bounds[1]
+
+            if intersection_width > 0 and intersection_height > 0:
+                return intersection_bounds
+
+    return None
+
+
+def intersect_detect(image_files):
+    intersections = []
+    for image1_path, image2_path in combinations(image_files, 2):
+        intersection_bounds = intersect_detect_two_images(image1_path, image2_path)
+        if intersection_bounds:
+            intersections.append(intersection_bounds)
+        else:
+            pass
+    return intersections
 
 
 class Editing_Tool:
@@ -37,6 +71,8 @@ class Editing_Tool:
 
         with rasterio.open(output_path, "w", **out_meta) as dest:
             dest.write(mosaic)
+        intersections = intersect_detect(tiff_files)
+        return intersections
 
     def crop_tiff_image(self, input_tiff_path, output_tiff_path, xmin, ymin, xmax, ymax):
         with rasterio.open(input_tiff_path) as src:
@@ -87,7 +123,7 @@ class Editing_Tool:
                 dest.write(out_image)
 
     def stack_tiff(self, tiff_paths, output_path):
-        sorted_tiff_paths = sort_tiffs_by_date(tiff_paths)
+        tiffs_with_dates = sort_tiffs_by_date(tiff_paths)
+        sorted_tiff_paths = [path for path, _ in tiffs_with_dates]
         self.merge_tiffs(sorted_tiff_paths, output_path)
-
-
+        return tiffs_with_dates
