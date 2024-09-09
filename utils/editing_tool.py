@@ -38,7 +38,7 @@ def intersect_detect_two_images(image1_path, image2_path):
             intersection_height = intersection_bounds[3] - intersection_bounds[1]
 
             if intersection_width > 0 and intersection_height > 0:
-                return intersection_bounds
+                return str(intersection_bounds).replace("(", "").replace(")", "")
 
     return None
 
