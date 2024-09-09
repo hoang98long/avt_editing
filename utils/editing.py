@@ -158,9 +158,9 @@ class Editing:
             ftp.cwd(str(ftp_dir))
             save_dir = ftp_dir + "/" + output_image_name
             task_output = str({
-                "output_image": [save_dir]
-                # "output_image": [save_dir],
-                # "intersection": intersections
+                # "output_image": [save_dir]
+                "output_image": [save_dir],
+                "intersection": intersections
             }).replace("'", "\"")
             with open(output_path, "rb") as file:
                 ftp.storbinary(f"STOR {save_dir}", file)
