@@ -165,7 +165,10 @@ class Editing:
             with open(output_path, "rb") as file:
                 ftp.storbinary(f"STOR {save_dir}", file)
             ftp.sendcmd(f'SITE CHMOD 775 {save_dir}')
-            print("Connection closed")
+            owner_group = 'avtadmin:avtadmin'
+            chown_command = f'SITE CHOWN {owner_group} {save_dir}'
+            ftp.sendcmd(chown_command)
+            # print("Connection closed")
             cursor = conn.cursor()
             route_to_db(cursor)
             cursor.execute("UPDATE avt_task SET task_stat = 1, task_output = %s, updated_at = %s WHERE id = %s",
@@ -177,7 +180,7 @@ class Editing:
             route_to_db(cursor)
             cursor.execute("UPDATE avt_task SET task_stat = 0 WHERE id = %s", (id,))
             conn.commit()
-            print(f"FTP error: {e}")
+            # print(f"FTP error: {e}")
             return False
 
     def crop_tiff_image(self, conn, id, task_param, config_data):
@@ -218,7 +221,10 @@ class Editing:
             with open(output_path, "rb") as file:
                 ftp.storbinary(f"STOR {save_dir}", file)
             ftp.sendcmd(f'SITE CHMOD 775 {save_dir}')
-            print("Connection closed")
+            owner_group = 'avtadmin:avtadmin'
+            chown_command = f'SITE CHOWN {owner_group} {save_dir}'
+            ftp.sendcmd(chown_command)
+            # print("Connection closed")
             cursor = conn.cursor()
             route_to_db(cursor)
             cursor.execute("UPDATE avt_task SET task_stat = 1, task_output = %s, updated_at = %s WHERE id = %s",
@@ -230,7 +236,7 @@ class Editing:
             route_to_db(cursor)
             cursor.execute("UPDATE avt_task SET task_stat = 0 WHERE id = %s", (id,))
             conn.commit()
-            print(f"FTP error: {e}")
+            # print(f"FTP error: {e}")
             return False
 
     def crop_polygon_tiff(self, conn, id, task_param, config_data):
@@ -269,7 +275,10 @@ class Editing:
             with open(output_path, "rb") as file:
                 ftp.storbinary(f"STOR {save_dir}", file)
             ftp.sendcmd(f'SITE CHMOD 775 {save_dir}')
-            print("Connection closed")
+            owner_group = 'avtadmin:avtadmin'
+            chown_command = f'SITE CHOWN {owner_group} {save_dir}'
+            ftp.sendcmd(chown_command)
+            # print("Connection closed")
             cursor = conn.cursor()
             route_to_db(cursor)
             cursor.execute("UPDATE avt_task SET task_stat = 1, task_output = %s, updated_at = %s WHERE id = %s",
@@ -281,7 +290,7 @@ class Editing:
             route_to_db(cursor)
             cursor.execute("UPDATE avt_task SET task_stat = 0 WHERE id = %s", (id,))
             conn.commit()
-            print(f"FTP error: {e}")
+            # print(f"FTP error: {e}")
             return False
 
     def stack_tiffs(self, conn, id, task_param, config_data):
@@ -323,7 +332,10 @@ class Editing:
             with open(output_path, "rb") as file:
                 ftp.storbinary(f"STOR {save_dir}", file)
             ftp.sendcmd(f'SITE CHMOD 775 {save_dir}')
-            print("Connection closed")
+            owner_group = 'avtadmin:avtadmin'
+            chown_command = f'SITE CHOWN {owner_group} {save_dir}'
+            ftp.sendcmd(chown_command)
+            # print("Connection closed")
             cursor = conn.cursor()
             route_to_db(cursor)
             cursor.execute("UPDATE avt_task SET task_stat = 1, task_output = %s, updated_at = %s WHERE id = %s",
@@ -335,7 +347,7 @@ class Editing:
             route_to_db(cursor)
             cursor.execute("UPDATE avt_task SET task_stat = 0 WHERE id = %s", (id,))
             conn.commit()
-            print(f"FTP error: {e}")
+            # print(f"FTP error: {e}")
             return False
 
     def process(self, id, config_data):
