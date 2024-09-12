@@ -10,6 +10,8 @@ import threading
 import numpy as np
 import rasterio
 from rasterio.warp import calculate_default_transform, reproject, Resampling
+import ast
+
 
 ftp_directory = json.load(open("ftp_directory.json"))
 FTP_MERGE_TIFF_PATH = ftp_directory['merge_tiffs_result_directory']
@@ -242,8 +244,9 @@ class Editing:
     def crop_polygon_tiff(self, conn, id, task_param, config_data):
         input_file = task_param['input_file']
         polygon = task_param['polygon']
-        polygon = np.array(polygon)
-        polygon = polygon.astype(float)
+        polygon = ast.literal_eval(polygon)[0]
+        # polygon = np.array(polygon)
+        # polygon = polygon.astype(float)[0]
         try:
             ftp = connect_ftp(config_data)
             filename = input_file.split("/")[-1]
