@@ -148,11 +148,11 @@ class Editing:
                     conn.commit()
                     return False
                 elif epsg_code != 4326:
-                    converted_input_file_local = input_files_local[i].split(".")[0] + "_4326.tiff"
+                    converted_input_file_local = input_files_local[i].split(".")[0] + "_4326.tif"
                     convert_epsg_4326(input_files_local[i], converted_input_file_local)
                     input_files_local[i] = converted_input_file_local
             date_create = get_time_string()
-            output_image_name = "result_merge_" + format(date_create) + ".tiff"
+            output_image_name = "result_merge_" + format(date_create) + ".tif"
             output_path = os.path.join(LOCAL_RESULT_MERGE_TIFF_PATH, output_image_name)
             editing_tool = Editing_Tool()
             intersections = editing_tool.merge_tiffs(input_files_local, output_path)
@@ -318,11 +318,11 @@ class Editing:
                     conn.commit()
                     return False
                 elif epsg_code != 4326:
-                    converted_input_file_local = input_files_local[i].split(".")[0] + "_4326.tiff"
+                    converted_input_file_local = input_files_local[i].split(".")[0] + "_4326.tif"
                     convert_epsg_4326(input_files_local[i], converted_input_file_local)
                     input_files_local[i] = converted_input_file_local
             date_create = get_time_string()
-            output_image_name = "result_stack_" + format(date_create) + ".tiff"
+            output_image_name = "result_stack_" + format(date_create) + ".tif"
             output_path = os.path.join(LOCAL_RESULT_STACK_TIFF_PATH, output_image_name)
             editing_tool = Editing_Tool()
             images_with_date = editing_tool.stack_tiff(input_files_local, output_path)
