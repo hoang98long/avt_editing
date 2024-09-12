@@ -167,9 +167,9 @@ class Editing:
             with open(output_path, "rb") as file:
                 ftp.storbinary(f"STOR {save_dir}", file)
             ftp.sendcmd(f'SITE CHMOD 775 {save_dir}')
-            owner_group = 'avtadmin:avtadmin'
-            chown_command = f'SITE CHOWN {owner_group} {save_dir}'
-            ftp.sendcmd(chown_command)
+            # owner_group = 'avtadmin:avtadmin'
+            # chown_command = f'SITE CHOWN {owner_group} {save_dir}'
+            # ftp.sendcmd(chown_command)
             # print("Connection closed")
             cursor = conn.cursor()
             route_to_db(cursor)
@@ -206,11 +206,11 @@ class Editing:
                 conn.commit()
                 return False
             elif epsg_code != 4326:
-                converted_input_files_local = local_file_path.split(".")[0] + "_4326.tiff"
+                converted_input_files_local = local_file_path.split(".")[0] + "_4326.tif"
                 convert_epsg_4326(local_file_path, converted_input_files_local)
                 local_file_path = converted_input_files_local
             date_create = get_time_string()
-            output_image_name = "result_crop_" + format(date_create) + ".tiff"
+            output_image_name = "result_crop_" + format(date_create) + ".tif"
             output_path = os.path.join(LOCAL_RESULT_CROP_TIFF_PATH, output_image_name)
             editing_tool = Editing_Tool()
             editing_tool.crop_tiff_image(local_file_path, output_path, xmin, ymin, xmax, ymax)
@@ -223,9 +223,9 @@ class Editing:
             with open(output_path, "rb") as file:
                 ftp.storbinary(f"STOR {save_dir}", file)
             ftp.sendcmd(f'SITE CHMOD 775 {save_dir}')
-            owner_group = 'avtadmin:avtadmin'
-            chown_command = f'SITE CHOWN {owner_group} {save_dir}'
-            ftp.sendcmd(chown_command)
+            # owner_group = 'avtadmin:avtadmin'
+            # chown_command = f'SITE CHOWN {owner_group} {save_dir}'
+            # ftp.sendcmd(chown_command)
             # print("Connection closed")
             cursor = conn.cursor()
             route_to_db(cursor)
@@ -245,6 +245,7 @@ class Editing:
         input_file = task_param['input_file']
         polygon = task_param['polygon']
         polygon = ast.literal_eval(polygon)[0]
+        # print(polygon)
         # polygon = np.array(polygon)
         # polygon = polygon.astype(float)[0]
         try:
@@ -261,11 +262,11 @@ class Editing:
                 conn.commit()
                 return False
             elif epsg_code != 4326:
-                converted_input_files_local = local_file_path.split(".")[0] + "_4326.tiff"
+                converted_input_files_local = local_file_path.split(".")[0] + "_4326.tif"
                 convert_epsg_4326(local_file_path, converted_input_files_local)
                 local_file_path = converted_input_files_local
             date_create = get_time_string()
-            output_image_name = "result_crop_polygon" + format(date_create) + ".tiff"
+            output_image_name = "result_crop_polygon_" + format(date_create) + ".tif"
             output_path = os.path.join(LOCAL_RESULT_CROP_POLYGON_TIFF_PATH, output_image_name)
             editing_tool = Editing_Tool()
             editing_tool.crop_polygon_tiff(local_file_path, output_path, polygon)
@@ -278,9 +279,9 @@ class Editing:
             with open(output_path, "rb") as file:
                 ftp.storbinary(f"STOR {save_dir}", file)
             ftp.sendcmd(f'SITE CHMOD 775 {save_dir}')
-            owner_group = 'avtadmin:avtadmin'
-            chown_command = f'SITE CHOWN {owner_group} {save_dir}'
-            ftp.sendcmd(chown_command)
+            # owner_group = 'avtadmin:avtadmin'
+            # chown_command = f'SITE CHOWN {owner_group} {save_dir}'
+            # ftp.sendcmd(chown_command)
             # print("Connection closed")
             cursor = conn.cursor()
             route_to_db(cursor)
@@ -335,9 +336,9 @@ class Editing:
             with open(output_path, "rb") as file:
                 ftp.storbinary(f"STOR {save_dir}", file)
             ftp.sendcmd(f'SITE CHMOD 775 {save_dir}')
-            owner_group = 'avtadmin:avtadmin'
-            chown_command = f'SITE CHOWN {owner_group} {save_dir}'
-            ftp.sendcmd(chown_command)
+            # owner_group = 'avtadmin:avtadmin'
+            # chown_command = f'SITE CHOWN {owner_group} {save_dir}'
+            # ftp.sendcmd(chown_command)
             # print("Connection closed")
             cursor = conn.cursor()
             route_to_db(cursor)
