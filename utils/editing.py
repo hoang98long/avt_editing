@@ -162,7 +162,7 @@ class Editing:
             task_output = str({
                 # "output_image": [save_dir]
                 "output_image": [save_dir],
-                "intersections": intersections
+                "intersections": str(intersections)
             }).replace("'", "\"")
             with open(output_path, "rb") as file:
                 ftp.storbinary(f"STOR {save_dir}", file)
