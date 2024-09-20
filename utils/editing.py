@@ -187,11 +187,8 @@ class Editing:
 
     def crop_tiff_image(self, conn, id, task_param, config_data):
         input_file = task_param['input_file']
-        xmin, ymin, xmax, ymax = task_param['bbox'][0:4]
-        xmin = float(xmin)
-        ymin = float(ymin)
-        xmax = float(xmax)
-        ymax = float(ymax)
+        rectangle_crop = task_param['polygon']
+        rectangle_crop = ast.literal_eval(rectangle_crop)[0]
         try:
             ftp = connect_ftp(config_data)
             filename = input_file.split("/")[-1]
@@ -213,7 +210,7 @@ class Editing:
             output_image_name = "result_crop_" + format(date_create) + ".tif"
             output_path = os.path.join(LOCAL_RESULT_CROP_TIFF_PATH, output_image_name)
             editing_tool = Editing_Tool()
-            editing_tool.crop_tiff_image(local_file_path, output_path, xmin, ymin, xmax, ymax)
+            editing_tool.crop_polygon_tiff(local_file_path, output_path, rectangle_crop)
             ftp_dir = FTP_CROP_TIFF_PATH
             ftp.cwd(str(ftp_dir))
             save_dir = ftp_dir + "/" + output_image_name
