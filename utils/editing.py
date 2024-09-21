@@ -129,6 +129,7 @@ class Editing:
 
     def merge_tiffs(self, conn, id, task_param, config_data):
         input_files = task_param['input_files']
+        print(input_files)
         try:
             ftp = connect_ftp(config_data)
             input_files_local = []
@@ -187,8 +188,8 @@ class Editing:
 
     def crop_tiff_image(self, conn, id, task_param, config_data):
         input_file = task_param['input_file']
-        rectangle_crop = task_param['polygon'][0]
-        # rectangle_crop = ast.literal_eval(rectangle_crop)[0]
+        rectangle_crop = task_param['polygon']
+        rectangle_crop = ast.literal_eval(rectangle_crop)[0]
         try:
             ftp = connect_ftp(config_data)
             filename = input_file.split("/")[-1]
@@ -240,8 +241,8 @@ class Editing:
 
     def crop_polygon_tiff(self, conn, id, task_param, config_data):
         input_file = task_param['input_file']
-        polygon = task_param['polygon'][0]
-        # polygon = ast.literal_eval(polygon)[0]
+        polygon = task_param['polygon']
+        polygon = ast.literal_eval(polygon)[0]
         # print(polygon)
         # polygon = np.array(polygon)
         # polygon = polygon.astype(float)[0]
