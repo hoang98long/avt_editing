@@ -144,8 +144,9 @@ class Editing:
                 if epsg_code == 0:
                     cursor = conn.cursor()
                     route_to_db(cursor)
-                    cursor.execute("UPDATE avt_task SET task_stat = 0 AND task_message = 'EPSG ERROR' WHERE id = %s",
-                                   (id,))
+                    cursor.execute(
+                        "UPDATE avt_task SET task_stat = 0, task_message = 'Khong dung dinh dang anh tiff EPSG',"
+                        "updated_at = %s WHERE id = %s", (get_time(), id))
                     conn.commit()
                     return False
                 elif epsg_code != 4326:
@@ -200,7 +201,8 @@ class Editing:
             if epsg_code == 0:
                 cursor = conn.cursor()
                 route_to_db(cursor)
-                cursor.execute("UPDATE avt_task SET task_stat = 0 AND task_message = 'EPSG ERROR' WHERE id = %s", (id,))
+                cursor.execute("UPDATE avt_task SET task_stat = 0, task_message = 'Khong dung dinh dang anh tiff EPSG',"
+                               "updated_at = %s WHERE id = %s", (get_time(), id))
                 conn.commit()
                 return False
             elif epsg_code != 4326:
@@ -256,7 +258,8 @@ class Editing:
             if epsg_code == 0:
                 cursor = conn.cursor()
                 route_to_db(cursor)
-                cursor.execute("UPDATE avt_task SET task_stat = 0 AND task_message = 'EPSG ERROR' WHERE id = %s", (id,))
+                cursor.execute("UPDATE avt_task SET task_stat = 0, task_message = 'Khong dung dinh dang anh tiff EPSG',"
+                               "updated_at = %s WHERE id = %s", (get_time(), id))
                 conn.commit()
                 return False
             elif epsg_code != 4326:
