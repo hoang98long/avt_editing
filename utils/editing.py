@@ -182,7 +182,7 @@ class Editing:
         except ftplib.all_errors as e:
             cursor = conn.cursor()
             route_to_db(cursor)
-            cursor.execute("UPDATE avt_task SET task_stat = 0 WHERE id = %s", (id,))
+            cursor.execute("UPDATE avt_task SET task_stat = 0, task_message = 'Lỗi đầu vào' WHERE id = %s", (id,))
             conn.commit()
             # print(f"FTP error: {e}")
             return False
@@ -236,7 +236,7 @@ class Editing:
         except ftplib.all_errors as e:
             cursor = conn.cursor()
             route_to_db(cursor)
-            cursor.execute("UPDATE avt_task SET task_stat = 0 WHERE id = %s", (id,))
+            cursor.execute("UPDATE avt_task SET task_stat = 0, task_message = 'Lỗi đầu vào' WHERE id = %s", (id,))
             conn.commit()
             # print(f"FTP error: {e}")
             return False
@@ -293,7 +293,7 @@ class Editing:
         except ftplib.all_errors as e:
             cursor = conn.cursor()
             route_to_db(cursor)
-            cursor.execute("UPDATE avt_task SET task_stat = 0 WHERE id = %s", (id,))
+            cursor.execute("UPDATE avt_task SET task_stat = 0, task_message = 'Lỗi đầu vào' WHERE id = %s", (id,))
             conn.commit()
             # print(f"FTP error: {e}")
             return False
@@ -350,7 +350,7 @@ class Editing:
         except ftplib.all_errors as e:
             cursor = conn.cursor()
             route_to_db(cursor)
-            cursor.execute("UPDATE avt_task SET task_stat = 0 WHERE id = %s", (id,))
+            cursor.execute("UPDATE avt_task SET task_stat = 0, task_message = 'Lỗi đầu vào' WHERE id = %s", (id,))
             conn.commit()
             # print(f"FTP error: {e}")
             return False
