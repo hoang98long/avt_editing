@@ -188,7 +188,7 @@ class Editing:
             return False
 
     def crop_tiff_image(self, conn, id, task_param, config_data):
-        input_file = task_param['input_file']
+        input_file = task_param['input_file'][0]
         rectangle_crop = task_param['polygon']
         rectangle_crop = ast.literal_eval(rectangle_crop)[0]
         try:
@@ -242,7 +242,7 @@ class Editing:
             return False
 
     def crop_polygon_tiff(self, conn, id, task_param, config_data):
-        input_file = task_param['input_file']
+        input_file = task_param['input_file'][0]
         polygon = task_param['polygon']
         polygon = ast.literal_eval(polygon)[0]
         # print(polygon)
