@@ -38,13 +38,13 @@ def intersect_detect_two_images(image1_path, image2_path):
             intersection_height = intersection_bounds[3] - intersection_bounds[1]
 
             if intersection_width > 0 and intersection_height > 0:
-                polygon = [
+                polygon = [[
                     [intersection_bounds[0], intersection_bounds[1]],  # [xmin, ymin]
                     [intersection_bounds[0], intersection_bounds[3]],  # [xmin, ymax]
                     [intersection_bounds[2], intersection_bounds[3]],  # [xmax, ymax]
                     [intersection_bounds[2], intersection_bounds[1]],  # [xmax, ymin]
                     [intersection_bounds[0], intersection_bounds[1]]
-                ]
+                ]]
                 return polygon
 
     return None
