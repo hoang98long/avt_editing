@@ -129,7 +129,7 @@ class Editing:
 
     def merge_tiffs(self, conn, id, task_param, config_data):
         input_files = task_param['input_files']
-        print(input_files)
+        # print(input_files)
         try:
             ftp = connect_ftp(config_data)
             input_files_local = []

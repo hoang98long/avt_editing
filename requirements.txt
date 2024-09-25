@@ -2,3 +2,4 @@ numpy
 psycopg2_binary
 pyinstaller
 Shapely
+schedule==1.2.2
