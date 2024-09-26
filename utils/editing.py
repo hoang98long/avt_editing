@@ -130,6 +130,14 @@ class Editing:
     def merge_tiffs(self, conn, id, task_param, config_data):
         input_files = task_param['input_files']
         # print(input_files)
+        if len(input_files) < 2:
+            cursor = conn.cursor()
+            route_to_db(cursor)
+            cursor.execute(
+                "UPDATE avt_task SET task_stat = 0, task_message = 'Thiếu ảnh để ghép',"
+                "updated_at = %s WHERE id = %s", (get_time(), id))
+            conn.commit()
+            return False
         try:
             ftp = connect_ftp(config_data)
             input_files_local = []
@@ -188,7 +196,16 @@ class Editing:
             return False
 
     def crop_tiff_image(self, conn, id, task_param, config_data):
-        input_file = task_param['input_file'][0]
+        input_file_arr = task_param['input_file']
+        if len(input_file_arr) < 1:
+            cursor = conn.cursor()
+            route_to_db(cursor)
+            cursor.execute(
+                "UPDATE avt_task SET task_stat = 0, task_message = 'Không có ảnh',"
+                "updated_at = %s WHERE id = %s", (get_time(), id))
+            conn.commit()
+            return False
+        input_file = input_file_arr[0]
         rectangle_crop = task_param['polygon']
         rectangle_crop = ast.literal_eval(rectangle_crop)[0]
         try:
@@ -242,7 +259,16 @@ class Editing:
             return False
 
     def crop_polygon_tiff(self, conn, id, task_param, config_data):
-        input_file = task_param['input_file'][0]
+        input_file_arr = task_param['input_file']
+        if len(input_file_arr) < 1:
+            cursor = conn.cursor()
+            route_to_db(cursor)
+            cursor.execute(
+                "UPDATE avt_task SET task_stat = 0, task_message = 'Không có ảnh',"
+                "updated_at = %s WHERE id = %s", (get_time(), id))
+            conn.commit()
+            return False
+        input_file = input_file_arr[0]
         polygon = task_param['polygon']
         polygon = ast.literal_eval(polygon)[0]
         # print(polygon)

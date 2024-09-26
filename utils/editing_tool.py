@@ -8,7 +8,6 @@ from datetime import datetime
 from itertools import combinations
 
 
-
 def get_date_modified(file_path):
     timestamp = os.path.getmtime(file_path)
     date_modified = datetime.fromtimestamp(timestamp)
