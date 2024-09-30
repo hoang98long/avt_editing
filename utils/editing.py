@@ -153,7 +153,7 @@ class Editing:
                     cursor = conn.cursor()
                     route_to_db(cursor)
                     cursor.execute(
-                        "UPDATE avt_task SET task_stat = 0, task_message = 'Khong dung dinh dang anh tiff EPSG',"
+                        "UPDATE avt_task SET task_stat = 0, task_message = 'Không đúng định dạng ảnh tiff EPSG',"
                         "updated_at = %s WHERE id = %s", (get_time(), id))
                     conn.commit()
                     return False
@@ -218,7 +218,7 @@ class Editing:
             if epsg_code == 0:
                 cursor = conn.cursor()
                 route_to_db(cursor)
-                cursor.execute("UPDATE avt_task SET task_stat = 0, task_message = 'Khong dung dinh dang anh tiff EPSG',"
+                cursor.execute("UPDATE avt_task SET task_stat = 0, task_message = 'Không đúng định dạng ảnh tiff EPSG',"
                                "updated_at = %s WHERE id = %s", (get_time(), id))
                 conn.commit()
                 return False
@@ -284,7 +284,7 @@ class Editing:
             if epsg_code == 0:
                 cursor = conn.cursor()
                 route_to_db(cursor)
-                cursor.execute("UPDATE avt_task SET task_stat = 0, task_message = 'Khong dung dinh dang anh tiff EPSG',"
+                cursor.execute("UPDATE avt_task SET task_stat = 0, task_message = 'Không đúng định dạng ảnh tiff EPSG',"
                                "updated_at = %s WHERE id = %s", (get_time(), id))
                 conn.commit()
                 return False
