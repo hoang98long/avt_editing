@@ -2,3 +2,4 @@
 /.idea/inspectionProfiles
 /.idea
 /utils/__pycache__
+config.json
