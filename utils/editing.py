@@ -147,20 +147,20 @@ class Editing:
                 input_files_local.append(local_file_path)
                 if not os.path.isfile(local_file_path):
                     download_file(ftp, input_file, local_file_path)
-            for i in range(len(input_files_local)):
-                epsg_code = check_epsg_code(input_files_local[i])
-                if epsg_code == 0:
-                    cursor = conn.cursor()
-                    route_to_db(cursor)
-                    cursor.execute(
-                        "UPDATE avt_task SET task_stat = 0, task_message = 'Không đúng định dạng ảnh tiff EPSG',"
-                        "updated_at = %s WHERE id = %s", (get_time(), id))
-                    conn.commit()
-                    return False
-                elif epsg_code != 4326:
-                    converted_input_file_local = input_files_local[i].split(".")[0] + "_4326.tif"
-                    convert_epsg_4326(input_files_local[i], converted_input_file_local)
-                    input_files_local[i] = converted_input_file_local
+            # for i in range(len(input_files_local)):
+            #     epsg_code = check_epsg_code(input_files_local[i])
+            #     if epsg_code == 0:
+            #         cursor = conn.cursor()
+            #         route_to_db(cursor)
+            #         cursor.execute(
+            #             "UPDATE avt_task SET task_stat = 0, task_message = 'Không đúng định dạng ảnh tiff EPSG',"
+            #             "updated_at = %s WHERE id = %s", (get_time(), id))
+            #         conn.commit()
+            #         return False
+            #     elif epsg_code != 4326:
+            #         converted_input_file_local = input_files_local[i].split(".")[0] + "_4326.tif"
+            #         convert_epsg_4326(input_files_local[i], converted_input_file_local)
+            #         input_files_local[i] = converted_input_file_local
             date_create = get_time_string()
             output_image_name = "result_merge_" + format(date_create) + ".tif"
             output_path = os.path.join(LOCAL_RESULT_MERGE_TIFF_PATH, output_image_name)
@@ -214,18 +214,18 @@ class Editing:
             local_file_path = os.path.join(LOCAL_SRC_CROP_TIFF_PATH, filename)
             if not os.path.isfile(local_file_path):
                 download_file(ftp, input_file, local_file_path)
-            epsg_code = check_epsg_code(local_file_path)
-            if epsg_code == 0:
-                cursor = conn.cursor()
-                route_to_db(cursor)
-                cursor.execute("UPDATE avt_task SET task_stat = 0, task_message = 'Không đúng định dạng ảnh tiff EPSG',"
-                               "updated_at = %s WHERE id = %s", (get_time(), id))
-                conn.commit()
-                return False
-            elif epsg_code != 4326:
-                converted_input_files_local = local_file_path.split(".")[0] + "_4326.tif"
-                convert_epsg_4326(local_file_path, converted_input_files_local)
-                local_file_path = converted_input_files_local
+            # epsg_code = check_epsg_code(local_file_path)
+            # if epsg_code == 0:
+            #     cursor = conn.cursor()
+            #     route_to_db(cursor)
+            #     cursor.execute("UPDATE avt_task SET task_stat = 0, task_message = 'Không đúng định dạng ảnh tiff EPSG',"
+            #                    "updated_at = %s WHERE id = %s", (get_time(), id))
+            #     conn.commit()
+            #     return False
+            # elif epsg_code != 4326:
+            #     converted_input_files_local = local_file_path.split(".")[0] + "_4326.tif"
+            #     convert_epsg_4326(local_file_path, converted_input_files_local)
+            #     local_file_path = converted_input_files_local
             date_create = get_time_string()
             output_image_name = "result_crop_" + format(date_create) + ".tif"
             output_path = os.path.join(LOCAL_RESULT_CROP_TIFF_PATH, output_image_name)
@@ -280,18 +280,18 @@ class Editing:
             local_file_path = os.path.join(LOCAL_SRC_CROP_POLYGON_TIFF_PATH, filename)
             if not os.path.isfile(local_file_path):
                 download_file(ftp, input_file, local_file_path)
-            epsg_code = check_epsg_code(local_file_path)
-            if epsg_code == 0:
-                cursor = conn.cursor()
-                route_to_db(cursor)
-                cursor.execute("UPDATE avt_task SET task_stat = 0, task_message = 'Không đúng định dạng ảnh tiff EPSG',"
-                               "updated_at = %s WHERE id = %s", (get_time(), id))
-                conn.commit()
-                return False
-            elif epsg_code != 4326:
-                converted_input_files_local = local_file_path.split(".")[0] + "_4326.tif"
-                convert_epsg_4326(local_file_path, converted_input_files_local)
-                local_file_path = converted_input_files_local
+            # epsg_code = check_epsg_code(local_file_path)
+            # if epsg_code == 0:
+            #     cursor = conn.cursor()
+            #     route_to_db(cursor)
+            #     cursor.execute("UPDATE avt_task SET task_stat = 0, task_message = 'Không đúng định dạng ảnh tiff EPSG',"
+            #                    "updated_at = %s WHERE id = %s", (get_time(), id))
+            #     conn.commit()
+            #     return False
+            # elif epsg_code != 4326:
+            #     converted_input_files_local = local_file_path.split(".")[0] + "_4326.tif"
+            #     convert_epsg_4326(local_file_path, converted_input_files_local)
+            #     local_file_path = converted_input_files_local
             date_create = get_time_string()
             output_image_name = "result_crop_polygon_" + format(date_create) + ".tif"
             output_path = os.path.join(LOCAL_RESULT_CROP_POLYGON_TIFF_PATH, output_image_name)
