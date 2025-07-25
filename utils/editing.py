@@ -18,6 +18,7 @@ FTP_MERGE_TIFF_PATH = ftp_directory['merge_tiffs_result_directory']
 FTP_CROP_TIFF_PATH = ftp_directory['crop_tiff_result_directory']
 FTP_CROP_POLYGON_TIFF_PATH = ftp_directory['crop_tiff_polygon_result_directory']
 FTP_STACK_TIFF_PATH = ftp_directory['stack_tiffs_result_directory']
+FTP_CLOUD_FILTER_BY_MERGE_IMAGE = ftp_directory['crop_tiff_polygon_result_directory']
 
 
 def connect_ftp(config_data):
@@ -381,7 +382,92 @@ class Editing:
             # print(f"FTP error: {e}")
             return False
 
-    def process(self, id, config_data):
+    def cloud_filter_by_merge_images(self, conn, id, task_param, config_data):
+        src_file_arr = task_param['src_file']
+        if len(src_file_arr) < 1:
+            cursor = conn.cursor()
+            route_to_db(cursor)
+            cursor.execute(
+                "UPDATE avt_task SET task_stat = 0, task_message = 'Không có ảnh',"
+                "updated_at = %s WHERE id = %s", (get_time(), id))
+            conn.commit()
+            return False
+        src_file = src_file_arr[0]
+        dst_file_arr = task_param['dst_file']
+        if len(dst_file_arr) < 1:
+            cursor = conn.cursor()
+            route_to_db(cursor)
+            cursor.execute(
+                "UPDATE avt_task SET task_stat = 0, task_message = 'Không có ảnh',"
+                "updated_at = %s WHERE id = %s", (get_time(), id))
+            conn.commit()
+            return False
+        dst_file = dst_file_arr[0]
+        polygon = task_param['polygon']
+        polygon = ast.literal_eval(polygon)[0]
+        # print(polygon)
+        # polygon = np.array(polygon)
+        # polygon = polygon.astype(float)[0]
+        try:
+            opacity = float(task_param['opacity'])
+        except Exception:
+            opacity = 0.8
+        try:
+            ftp = connect_ftp(config_data)
+            src_file_name = src_file.split("/")[-1]
+            local_src_file_path = os.path.join(LOCAL_SRC_CLOUD_FILTER_BY_MERGE_IMAGE_PATH, src_file_name)
+            if not os.path.isfile(local_src_file_path):
+                download_file(ftp, src_file, local_src_file_path)
+            dst_file_name = dst_file.split("/")[-1]
+            local_dst_file_path = os.path.join(LOCAL_DST_CLOUD_FILTER_BY_MERGE_IMAGE_PATH, dst_file_name)
+            if not os.path.isfile(local_dst_file_path):
+                download_file(ftp, dst_file, local_dst_file_path)
+            # epsg_code = check_epsg_code(local_file_path)
+            # if epsg_code == 0:
+            #     cursor = conn.cursor()
+            #     route_to_db(cursor)
+            #     cursor.execute("UPDATE avt_task SET task_stat = 0, task_message = 'Không đúng định dạng ảnh tiff EPSG',"
+            #                    "updated_at = %s WHERE id = %s", (get_time(), id))
+            #     conn.commit()
+            #     return False
+            # elif epsg_code != 4326:
+            #     converted_input_files_local = local_file_path.split(".")[0] + "_4326.tif"
+            #     convert_epsg_4326(local_file_path, converted_input_files_local)
+            #     local_file_path = converted_input_files_local
+            date_create = get_time_string()
+            output_image_name = "result_cloud_filter_" + format(date_create) + ".tif"
+            output_path = os.path.join(LOCAL_RESULT_CLOUD_FILTER_BY_MERGE_IMAGE_PATH, output_image_name)
+            editing_tool = Editing_Tool()
+            editing_tool.cloud_filter_by_merge_images(local_src_file_path, local_dst_file_path, output_path, polygon, opacity)
+            ftp_dir = FTP_CLOUD_FILTER_BY_MERGE_IMAGE
+            ftp.cwd(str(ftp_dir))
+            save_dir = ftp_dir + "/" + output_image_name
+            task_output = str({
+                "output_image": [save_dir]
+            }).replace("'", "\"")
+            with open(output_path, "rb") as file:
+                ftp.storbinary(f"STOR {save_dir}", file)
+            ftp.sendcmd(f'SITE CHMOD 775 {save_dir}')
+            # owner_group = 'avtadmin:avtadmin'
+            # chown_command = f'SITE CHOWN {owner_group} {save_dir}'
+            # ftp.sendcmd(chown_command)
+            # print("Connection closed")
+            cursor = conn.cursor()
+            route_to_db(cursor)
+            cursor.execute("UPDATE avt_task SET task_stat = 1, task_output = %s, updated_at = %s WHERE id = %s",
+                           (task_output, get_time(), id,))
+            conn.commit()
+            return True
+        except ftplib.all_errors as e:
+            cursor = conn.cursor()
+            route_to_db(cursor)
+            cursor.execute("UPDATE avt_task SET task_stat = 0, task_message = 'Lỗi đầu vào' WHERE id = %s", (id,))
+            conn.commit()
+            # print(f"FTP error: {e}")
+            return False
+
+
+def process(self, id, config_data):
         conn = psycopg2.connect(
             dbname=config_data['database']['database'],
             user=config_data['database']['user'],
@@ -410,6 +496,8 @@ class Editing:
                 return_flag = self.crop_polygon_tiff(conn, id, task_param, config_data)
             elif algorithm == "xep_chong":
                 return_flag = self.stack_tiffs(conn, id, task_param, config_data)
+            elif algorithm == "loc_may_bang_ghep_anh":
+                return_flag = self.cloud_filter_by_merge_images(conn, id, task_param, config_data)
             cursor.close()
             if return_flag:
                 task_stat_value_holder['value'] = 1

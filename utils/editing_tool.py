@@ -1,11 +1,14 @@
 import rasterio
 from rasterio.merge import merge
 from rasterio.mask import mask
-from shapely.geometry import Polygon, box
+from shapely.geometry import Polygon, box, mapping
+from rasterio.features import geometry_mask
+from rasterio.transform import rowcol
 # from shapely.geometry.polygon import orient
 import os
 from datetime import datetime
 from itertools import combinations
+import numpy as np
 
 
 def get_date_modified(file_path):
@@ -133,3 +136,47 @@ class Editing_Tool:
         sorted_tiff_paths = [path for path, _ in tiffs_with_dates]
         self.merge_tiffs(sorted_tiff_paths, output_path)
         return tiffs_with_dates
+
+    def cloud_filter_by_merge_images(self, src_path, dst_path, output_path, polygon_coords, opacity=0.8):
+        if not (0.0 <= opacity <= 1.0):
+            raise ValueError("opacity error")
+        polygon = Polygon(polygon_coords)
+        with rasterio.open(src_path) as src:
+            src_image_cropped, src_transform = mask(
+                src,
+                [mapping(polygon)],
+                crop=True,
+                filled=True,
+                nodata=None
+            )
+            src_meta = src.meta
+            dtype = src.dtypes[0]
+            max_val = np.iinfo(dtype).max if "int" in dtype else np.finfo(dtype).max
+            height, width = src_image_cropped.shape[1:]
+            mask_polygon = geometry_mask(
+                [mapping(polygon)],
+                out_shape=(height, width),
+                transform=src_transform,
+                invert=True
+            )
+        with rasterio.open(dst_path) as dst:
+            dst_image = dst.read()
+            dst_meta = dst.meta
+            dst_transform = dst.transform
+            minx, miny, maxx, maxy = polygon.bounds
+            top_left_x = minx
+            top_left_y = maxy
+            start_row, start_col = rowcol(dst_transform, top_left_x, top_left_y)
+            end_row = start_row + height
+            end_col = start_col + width
+            if end_row > dst_image.shape[1] or end_col > dst_image.shape[2]:
+                raise ValueError("polygon error")
+            dest_crop = dst_image[:, start_row:end_row, start_col:end_col]
+            blended = (src_image_cropped * opacity + dest_crop * (1 - opacity)).astype(src_image_cropped.dtype)
+            for b in range(dst_image.shape[0]):
+                dest_band = dest_crop[b]
+                src_band = blended[b]
+                dest_band = np.where(mask_polygon, src_band, dest_band)
+                dst_image[b, start_row:end_row, start_col:end_col] = dest_band
+        with rasterio.open(output_path, 'w', **dst_meta) as out:
+            out.write(dst_image)
