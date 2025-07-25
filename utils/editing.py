@@ -18,7 +18,7 @@ FTP_MERGE_TIFF_PATH = ftp_directory['merge_tiffs_result_directory']
 FTP_CROP_TIFF_PATH = ftp_directory['crop_tiff_result_directory']
 FTP_CROP_POLYGON_TIFF_PATH = ftp_directory['crop_tiff_polygon_result_directory']
 FTP_STACK_TIFF_PATH = ftp_directory['stack_tiffs_result_directory']
-FTP_CLOUD_FILTER_BY_MERGE_IMAGE = ftp_directory['crop_tiff_polygon_result_directory']
+FTP_CLOUD_FILTER_BY_MERGE_IMAGE = ftp_directory['cloud_filter_result_directory']
 
 
 def connect_ftp(config_data):

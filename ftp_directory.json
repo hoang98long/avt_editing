@@ -6,5 +6,6 @@
     "merge_tiffs_result_directory": "/data/RASTER_ARCHIVED/anh_bien_tap/ghep_anh",
     "crop_tiff_result_directory": "/data/RASTER_ARCHIVED/anh_bien_tap/cat_anh",
     "crop_tiff_polygon_result_directory": "/data/RASTER_ARCHIVED/anh_bien_tap/cat_da_giac",
-    "stack_tiffs_result_directory": "/data/RASTER_ARCHIVED/anh_bien_tap/xep_chong"
+    "stack_tiffs_result_directory": "/data/RASTER_ARCHIVED/anh_bien_tap/xep_chong",
+    "cloud_filter_result_directory": "/data/RASTER_ARCHIVED/anh_bien_tap/loc_may_bang_ghep_anh"
 }
