@@ -494,7 +494,7 @@ def process(self, id, config_data):
                 return_flag = self.crop_tiff_image(conn, id, task_param, config_data)
             elif algorithm == "cat_da_giac":
                 return_flag = self.crop_polygon_tiff(conn, id, task_param, config_data)
-            elif algorithm == "xep_chong":
+            elif algorithm == "ghep_anh_theo_thoi_gian":
                 return_flag = self.stack_tiffs(conn, id, task_param, config_data)
             elif algorithm == "loc_may_bang_ghep_anh":
                 return_flag = self.cloud_filter_by_merge_images(conn, id, task_param, config_data)
