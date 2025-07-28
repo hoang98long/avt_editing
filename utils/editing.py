@@ -467,7 +467,7 @@ class Editing:
             return False
 
 
-def process(self, id, config_data):
+    def process(self, id, config_data):
         conn = psycopg2.connect(
             dbname=config_data['database']['database'],
             user=config_data['database']['user'],
