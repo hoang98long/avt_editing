@@ -135,7 +135,7 @@ class Editing_Tool:
         tiffs_with_dates = sort_tiffs_by_date(tiff_paths)
         sorted_tiff_paths = [path for path, _ in tiffs_with_dates]
         self.merge_tiffs(sorted_tiff_paths, output_path)
-        return tiffs_with_dates
+        # return tiffs_with_dates
 
     def cloud_filter_by_merge_images(self, src_path, dst_path, output_path, polygon_coords, opacity=0.8):
         if not (0.0 <= opacity <= 1.0):
